@@ -1,0 +1,22 @@
+{
+  "name": "dudmethod",
+  "version": "1.0.0",
+  "description": "implementation of custom DID Method did:monokee",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/monokee-dev/stage-unitn-xausa.git"
+  },
+  "author": "Marco Xausa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/monokee-dev/stage-unitn-xausa/issues"
+  },
+  "homepage": "https://github.com/monokee-dev/stage-unitn-xausa#readme",
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}
