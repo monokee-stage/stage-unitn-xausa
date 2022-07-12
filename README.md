@@ -1,5 +1,5 @@
 # stage-unitn-xausa
-First implementation of did:monokee DID Method following [DID-CORE](https://www.w3.org/TR/did-core/) specification and [DID Requirements](https://www.w3.org/TR/did-core/#methods).
+First implementation of `did:monokee` DID Method following [DID-CORE](https://www.w3.org/TR/did-core/) specification and [DID Requirements](https://www.w3.org/TR/did-core/#methods).
 This is library contains every CRUD operation available for this method. 
 
 ## DID Schema
@@ -11,7 +11,6 @@ the `method-specific-identifier` follows the [DID Syntax](https://www.w3.org/TR/
 
 ### Method-specific identifier
 
-TODO: how to obtain the method-specific-identifier
 
 ## CRUD Operations
 ### Create
