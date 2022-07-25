@@ -1,16 +1,23 @@
 # stage-unitn-xausa
-First implementation of `did:monokee` DID Method following [DID-CORE](https://www.w3.org/TR/did-core/) specification and [DID Requirements](https://www.w3.org/TR/did-core/#methods).
-This is library contains every CRUD operation available for this method. 
+Documentation describing A top-down approacc to DID Method implementation according to [DID-CORE](https://www.w3.org/TR/did-core/) specifications.
+This documentation includes `did:monokee` Method implementation details and all the steps needed for implementing such DID Method, starting from design choiches to technical requirements.
+
+
 
 ## DID Schema
+To begin developing a DID Method, The structure 
 A DID is an URI with a fixed structure. For this method, the syntax is the following
+
+
 ```
-did:monokee:method-specific-identifier
+  monokee-did            = "did:monokee:" idstring
+
 ```
-the `method-specific-identifier` follows the [DID Syntax](https://www.w3.org/TR/did-core/#did-syntax) specifications
+
+The idstring conforms to [Universally unique identifier (UUID) v4](https://www.ietf.org/rfc/rfc4122.txt).
 
 ### Method-specific identifier
-
+the `method-specific-identifier` follows the [DID Syntax](https://www.w3.org/TR/did-core/#did-syntax) specification
 
 ## CRUD Operations
 ### Create

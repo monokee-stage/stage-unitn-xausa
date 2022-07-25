@@ -1,8 +1,9 @@
 {
-  "name": "dudmethod",
+  "name": "did-monokee-reference-implementation",
   "version": "1.0.0",
-  "description": "implementation of custom DID Method did:monokee",
+  "description": "reference implementation of DID Method did:monokee",
   "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,6 +18,16 @@
   },
   "homepage": "https://github.com/monokee-dev/stage-unitn-xausa#readme",
   "devDependencies": {
+    "mongoose": "^6.4.6",
     "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@noble/ed25519": "^1.6.1",
+    "bs58": "^5.0.0",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "node-fetch": "^2.6.7",
+    "uuid": "^8.3.2"
   }
 }
