@@ -34,3 +34,18 @@ export interface ResponseBody{
     didDocument:DIDDocument,
     didDocumentMetadata:string
 }
+
+export interface Params {
+    [index: string]: string
+}
+
+export interface ParsedDid {
+    did: string
+    didUrl: string
+    method: string
+    id: string
+    path?: string
+    fragment?: string
+    query?: string
+    params?: Params
+  }
