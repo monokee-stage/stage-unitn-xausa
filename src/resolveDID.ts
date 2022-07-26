@@ -1,5 +1,5 @@
 import { DIDDocument, ResponseBody } from './types';
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
 export async function resolveDID(did:string): Promise<DIDDocument> {
     try {
