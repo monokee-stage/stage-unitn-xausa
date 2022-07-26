@@ -44,8 +44,7 @@ export async function dereferenceDID(didUrl:string): Promise<VerificationMethod 
               //If a request for a service endpoit arrives, just resolve the did or returns the service endpoint or the complete service field
               //if it contains nedded information for the enpoint usage.
 
-              //if the key of a verification method is requested, 
-
+              //simply return a verification method, further customization needed
               let didDocument=await resolveDID((<ParsedDid>parts).did);
               let methods=didDocument.verificationMethod;
               if(methods){

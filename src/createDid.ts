@@ -1,8 +1,7 @@
 const uuid = require('uuid');
 import * as ed from '@noble/ed25519';
 import * as bs58 from 'bs58';
-import * as fetch from 'node-fetch';
-require('util').inspect.defaultOptions.depth = null; // just to see the full log object
+import fetch from 'node-fetch';
 
 export interface ServiceEndpoint {
     id: string
