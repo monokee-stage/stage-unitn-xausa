@@ -48,7 +48,7 @@ export async function createDID(): Promise<string> {
             let did="did:monokee:"+uuid.v4();
 
             //create the keys
-            let privateKey =  ed.utils.randomPrivateKey();//how to store the private key?
+            let privateKey =  ed.utils.randomPrivateKey();//how to store the private key? should this be performed outside the funcion? (probably)
             let publicKey = await ed.getPublicKey(privateKey);
             let publicKeyb58= bs58.encode(publicKey);
             let x25519key=await ed.getSharedSecret(privateKey,publicKey);
@@ -62,7 +62,7 @@ export async function createDID(): Promise<string> {
             
             let url:string = "http://localhost:8080/createdid";
 
-            let responseMetadata:any = await fetch(url, {
+            await fetch(url, {
                 method: 'post',
                 body: JSON.stringify(requestbody),
                 headers: {'Content-Type': 'application/json'}
@@ -113,31 +113,29 @@ async function createRequestBody(didDocument:DIDDocument,privateKey:Uint8Array):
  * @param pubkx 
  * @returns the data structure with the complete didDocument
  */
-async function createDidDocument(did:string,pubked:string,pubkx:string):Promise<DIDDocument>{
+ function createDidDocument(did:string,pubked:string,pubkx:string):DIDDocument{
 
-    return new Promise<DIDDocument>(async (resolve)=>{
-        let vm1:VerificationMethod={
-            id: did+"#key-1",
-            type: "Ed25519VerificationKey2018",
-            controller: did,
-            publicKeyBase58: pubked
-        };
+    let vm1:VerificationMethod={
+        id: did+"#key-1",
+        type: "Ed25519VerificationKey2018",
+        controller: did,
+        publicKeyBase58: pubked
+    };
 
-        let vm2:VerificationMethod={
-            id: did+"#key-2",
-            type: "X25519KeyAgreementKey2019",
-            controller: did,
-            publicKeyBase58: pubkx
-        };
+    let vm2:VerificationMethod={
+        id: did+"#key-2",
+        type: "X25519KeyAgreementKey2019",
+        controller: did,
+        publicKeyBase58: pubkx
+    };
 
-        let document:DIDDocument={
-            '@context': 'https://www.w3.org/ns/did/v1',
-            id: did,
-            verificationMethod: [vm1,vm2],
-            authentication:[vm1.id],
-            assertionMethod:[vm1.id],
-            keyAgreement:[vm2.id]
-        };
-        resolve(document);
-    });
+    let document:DIDDocument={
+        '@context': 'https://www.w3.org/ns/did/v1',
+        id: did,
+        verificationMethod: [vm1,vm2],
+        authentication:[vm1.id],
+        assertionMethod:[vm1.id],
+        keyAgreement:[vm2.id]
+    };
+    return document;
 }

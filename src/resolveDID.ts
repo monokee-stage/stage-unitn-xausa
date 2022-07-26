@@ -9,7 +9,6 @@ export async function resolveDID(did:string): Promise<DIDDocument> {
             let doc:DIDDocument=(<ResponseBody>response).didDocument
             resolve(doc);
         });
-        
     } catch (error) {
         console.log(`Error occurred in resolveDID function ${error}`); //logger could be better
         throw error;
@@ -24,8 +23,10 @@ export async function wrapFetch(url:string):Promise<ResponseBody>{
         if(sup===undefined){
             reject("error on get request");
         }
-        response=<ResponseBody>sup;
-        resolve(response);
-
+        else{
+            response=<ResponseBody>sup;
+            resolve(response);
+        }
+        
     });
 }
