@@ -1,7 +1,7 @@
 const uuid = require('uuid');
 import * as ed from '@noble/ed25519';
 import * as bs58 from 'bs58';
-import fetch from 'node-fetch'
+import * as fetch from 'node-fetch';
 require('util').inspect.defaultOptions.depth = null; // just to see the full log object
 
 export interface ServiceEndpoint {
@@ -61,7 +61,6 @@ export async function createDID(): Promise<string> {
             let requestbody=await createRequestBody(didDocument,privateKey);
             
             let url:string = "http://localhost:8080/createdid";
-            fetch(url)
 
             let responseMetadata:any = await fetch(url, {
                 method: 'post',
