@@ -29,8 +29,53 @@ export interface RequestBody{
     signature:string        //base 58 signature (signature is produce from a Uint8Array of the document, not a string)
 }
 
+export interface ResolutionMetadata{
+    contentType:string
+}
+
+export interface DidDocumentMetadata{
+    did:string
+    created:string
+    updated:string
+}
+
 export interface ResponseBody{
-    resolutionMetadata: string,
-    didDocument:DIDDocument,
-    didDocumentMetadata:string
+    resolutionMetadata: ResolutionMetadata
+    didDocument:DIDDocument
+    didDocumentMetadata:DidDocumentMetadata
+}
+
+export interface Params {
+    [index: string]: string
+}
+
+export interface ParsedDid {
+    did: string
+    didUrl: string
+    method: string
+    id: string
+    path?: string
+    fragment?: string
+    query?: string
+    params?: Params
+}
+
+export interface DereferencingMetadata {
+    contentType:string,
+    error?:string
+}
+
+
+export interface ContentMetadata{ //must be a didDocumentMetadata if DereferencingResponse contains a DIDDocument
+
+}
+
+export interface DereferencingOptions{ 
+    accept:string //response type requested by the caller
+}
+
+export interface DereferencingResponse{
+    dereferencingMetadata:DereferencingMetadata | string,
+    contentStream:ServiceEndpoint | VerificationMethod | DIDDocument |string,
+    contentMetadata:ContentMetadata | string
 }
