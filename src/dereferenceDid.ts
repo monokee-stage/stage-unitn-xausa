@@ -26,16 +26,11 @@ const DID_MATCHER = new RegExp(`^did:${METHOD}:${METHOD_ID}${PARAMS}${PATH}${QUE
  * @param didUrl 
  * @returns a verification method, or a service or a document depending on the didUrl
  */
-
 export async function dereferenceDID(didUrl:string,dereferencingOptions:any): Promise<DereferencingResponse> { //
     try {
         return new Promise<DereferencingResponse>(async (resolve,reject)=>{
             let parts = parse(didUrl);
-            let response :DereferencingResponse={
-              dereferencingMetadata:"",
-              contentStream:"",
-              contentMetadata:""
-            };
+            let response :DereferencingResponse;
             let dereferencingMetadata :DereferencingMetadata;
             let responseContent: VerificationMethod | DIDDocument | ServiceEndpoint | string ="";
             let contentMetadata: ContentMetadata={};
@@ -46,10 +41,9 @@ export async function dereferenceDID(didUrl:string,dereferencingOptions:any): Pr
                 contentType:"application/json",
                 error:"invalidDidUrl"
               };
-              responseContent="";
               response={
                 dereferencingMetadata:dereferencingMetadata,
-                contentStream:responseContent,
+                contentStream:"",
                 contentMetadata:contentMetadata
               };
               resolve(response)
@@ -61,6 +55,8 @@ export async function dereferenceDID(didUrl:string,dereferencingOptions:any): Pr
               let services=didDocument.service;
 
               //look for the key among the verification methods/services
+
+              //still missing the did resolution
 
               if(methods){
                 for (let i=0;i<methods.length;i++){
@@ -125,7 +121,7 @@ export async function dereferenceDID(didUrl:string,dereferencingOptions:any): Pr
 
 
 /**
- * from did-resolver
+ * from did-resolver. Parse the did url to obtain all its components
  * @param didUrl 
  * @returns 
  */

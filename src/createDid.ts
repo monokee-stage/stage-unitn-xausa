@@ -39,7 +39,7 @@ export interface RequestBody{
  * Creates the DID and the DID Document.
  * @returns a string containind the did
  */
-export async function createDID(): Promise<string> {
+export async function createDID(privateKey:Uint8Array): Promise<string> {
     try {
         return new Promise<string>(async (resolve,reject)=>{
 
@@ -47,28 +47,32 @@ export async function createDID(): Promise<string> {
             let did="did:monokee:"+uuid.v4();
 
             //create the keys
-            let privateKey =  ed.utils.randomPrivateKey();//how to store the private key?
-            let publicKey = await ed.getPublicKey(privateKey);
-            let publicKeyb58= bs58.encode(publicKey);
-            let x25519key=await ed.getSharedSecret(privateKey,publicKey);
-            let x25519keyb58=bs58.encode(x25519key);
+            if(privateKey.length !== 32){
+                reject("invalid private key")
+            }
+            else{
+                let publicKey = <Uint8Array>await ed.getPublicKey(privateKey);
 
-            //create the document
-            let didDocument=await createDidDocument(did,publicKeyb58,x25519keyb58);
-
-            //obtain 
-            let requestbody=await createRequestBody(didDocument,privateKey);
-            
-            let url:string = "http://localhost:8080/createdid";
-
-            let responseMetadata:any = await fetch(url, {
-                method: 'post',
-                body: JSON.stringify(requestbody),
-                headers: {'Content-Type': 'application/json'}
-            }).catch(()=>{
-                reject("error on post request");
-            });
-            resolve(did);
+                let publicKeyb58= bs58.encode(publicKey);
+                let x25519key=await ed.getSharedSecret(privateKey,publicKey);
+                let x25519keyb58=bs58.encode(x25519key);
+    
+                //create the document
+                let didDocument=await createDidDocument(did,publicKeyb58,x25519keyb58);
+    
+                //obtain 
+                let requestbody=await createRequestBody(didDocument,privateKey);
+                
+                let url:string = "http://localhost:8080/createdid";
+    
+                let responseMetadata:any = await fetch(url, {
+                    method: 'post',
+                    body: JSON.stringify(requestbody),
+                    headers: {'Content-Type': 'application/json'}
+                }).then((res)=> {return res.json()})
+                resolve(did);
+            }
+           
 
         });
         

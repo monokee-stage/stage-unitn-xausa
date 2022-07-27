@@ -21,7 +21,7 @@ export async function wrapFetch(url:string):Promise<ResponseBody>{
     return new Promise<ResponseBody>(async (resolve,reject)=>{
         var sup:ResponseBody | undefined;
         var response: ResponseBody;
-        sup=await fetch(url).then((res:any)=>res.json()).then((res:any):ResponseBody=> {return res});
+        sup=await fetch(url).then((res:any)=>{return res.json()});
         if(sup===undefined){
             reject("error on get request");
         }
