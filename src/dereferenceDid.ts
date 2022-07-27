@@ -2,9 +2,8 @@
  * while waiting for further information about the origin of the did:sov that should 
  * be contained insite a did:monokee, this is a partial implementation of the URL dereferencing process
  */
-import { VerificationMethod } from "did-resolver";
 import { resolveDID } from "./resolveDID";
-import { DIDDocument, ParsedDid, ServiceEndpoint } from "./types";
+import { DIDDocument, ParsedDid, ServiceEndpoint, VerificationMethod , DereferencingResponse,DereferencingOptions,DereferencingMetadata, ContentMetadata } from "./types";
 
 //from did-resolver
 const PCT_ENCODED = '(?:%[0-9a-fA-F]{2})'
@@ -20,41 +19,101 @@ const FRAGMENT = `(#.*)?`
 const DID_MATCHER = new RegExp(`^did:${METHOD}:${METHOD_ID}${PARAMS}${PATH}${QUERY}${FRAGMENT}$`)
 
 
-interface DereferencingMetadata {
-
-}
 
 
-interface contentMetadata{
-
-}
 /**
  * dereference the did and obtain the requested data
  * @param didUrl 
  * @returns a verification method, or a service or a document depending on the didUrl
  */
 
-export async function dereferenceDID(didUrl:string): Promise<VerificationMethod | ServiceEndpoint | DIDDocument> { //
+export async function dereferenceDID(didUrl:string,dereferencingOptions:any): Promise<DereferencingResponse> { //
     try {
-        return new Promise<VerificationMethod | ServiceEndpoint | DIDDocument>(async (resolve,reject)=>{
+        return new Promise<DereferencingResponse>(async (resolve,reject)=>{
             let parts = parse(didUrl);
-            if(parts==null)
-              reject("invalid did url")
-            else{
-              //If a request for a service endpoit arrives, just resolve the did or returns the service endpoint or the complete service field
-              //if it contains nedded information for the enpoint usage.
+            let response :DereferencingResponse={
+              dereferencingMetadata:"",
+              contentStream:"",
+              contentMetadata:""
+            };
+            let dereferencingMetadata :DereferencingMetadata;
+            let responseContent: VerificationMethod | DIDDocument | ServiceEndpoint | string ="";
+            let contentMetadata: ContentMetadata={};
 
-              //simply return a verification method, further customization needed
+
+            if(parts==null){ //invalid DID
+              dereferencingMetadata={
+                contentType:"application/json",
+                error:"invalidDidUrl"
+              };
+              responseContent="";
+              response={
+                dereferencingMetadata:dereferencingMetadata,
+                contentStream:responseContent,
+                contentMetadata:contentMetadata
+              };
+              resolve(response)
+            }
+              
+            else{
               let didDocument=await resolveDID((<ParsedDid>parts).did);
               let methods=didDocument.verificationMethod;
+              let services=didDocument.service;
+
+              //look for the key among the verification methods/services
+
               if(methods){
                 for (let i=0;i<methods.length;i++){
                   let sup=parts?.did+"#"+parts?.fragment;
-                  if(methods[i].id==sup) 
-                    resolve(methods[i]); 
+                  if(methods[i].id==sup){
+                    responseContent=methods[i];
+                    dereferencingMetadata = {
+                      contentType:"application/json"
+                    };
+                    response={
+                      dereferencingMetadata:dereferencingMetadata,
+                      contentStream:responseContent,
+                      contentMetadata:contentMetadata
+                    };
+                    resolve(response);
+                  }
+                   
                 }
               }
+              if(services){
+                for (let i=0;i<services.length;i++){
+                  let sup=parts?.did+"#"+parts?.fragment;
+                  if(services[i].id==sup){
+                    //if it is a did, resolve it and return the document
+                    responseContent=services[i];
+                    dereferencingMetadata = {
+                      contentType:"application/json"
+                    };
+                    response={
+                      dereferencingMetadata:dereferencingMetadata,
+                      contentStream:responseContent,
+                      contentMetadata:contentMetadata
+                    };
+                    resolve(response);
+                  } 
+                }
+              }
+              if(responseContent=""){
+                dereferencingMetadata={
+                  contentType:"application/json",
+                  error:"notFound"
+                };
+                responseContent="";
+                response={
+                  dereferencingMetadata:dereferencingMetadata,
+                  contentStream:responseContent,
+                  contentMetadata:contentMetadata
+                };
+                resolve(response);
+              }
+              
             }
+            
 
         });
         
@@ -71,28 +130,28 @@ export async function dereferenceDID(didUrl:string): Promise<VerificationMethod 
  * @returns 
  */
 export function parse(didUrl: string): ParsedDid | null {
-    if (didUrl === '' || !didUrl) 
-        return null
-    const sections = didUrl.match(DID_MATCHER)
-    if (sections) {
-      const parts: ParsedDid = {
-        did: `did:${sections[1]}:${sections[2]}`,
-        method: sections[1],
-        id: sections[2],
-        didUrl,
-      }
-      if (sections[4]) {
-        const params = sections[4].slice(1).split(';')
-        parts.params = {}
-        for (const p of params) {
-          const kv = p.split('=')
-          parts.params[kv[0]] = kv[1]
-        }
-      }
-      if (sections[6]) parts.path = sections[6]
-      if (sections[7]) parts.query = sections[7].slice(1)
-      if (sections[8]) parts.fragment = sections[8].slice(1)
-      return parts
+  if (didUrl === '' || !didUrl) 
+      return null
+  const sections = didUrl.match(DID_MATCHER)
+  if (sections) {
+    const parts: ParsedDid = {
+      did: `did:${sections[1]}:${sections[2]}`,
+      method: sections[1],
+      id: sections[2],
+      didUrl
     }
-    return null
+    if (sections[4]) {
+      const params = sections[4].slice(1).split(';')
+      parts.params = {}
+      for (const p of params) {
+        const kv = p.split('=')
+        parts.params[kv[0]] = kv[1]
+      }
+    }
+    if (sections[6]) parts.path = sections[6]
+    if (sections[7]) parts.query = sections[7].slice(1)
+    if (sections[8]) parts.fragment = sections[8].slice(1)
+    return parts
   }
+  return null
+}

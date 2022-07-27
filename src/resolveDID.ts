@@ -7,6 +7,7 @@ export async function resolveDID(did:string): Promise<DIDDocument> {
             let url = "http://localhost:8080/resolvedid/"+did;
             let response= await wrapFetch(url).catch(()=>{reject()});
             let doc:DIDDocument=(<ResponseBody>response).didDocument
+
             resolve(doc);
         });
         
@@ -24,8 +25,11 @@ export async function wrapFetch(url:string):Promise<ResponseBody>{
         if(sup===undefined){
             reject("error on get request");
         }
-        response=<ResponseBody>sup;
-        resolve(response);
+        else{
+            response=<ResponseBody>sup;
+            resolve(response);
+        }
+        
 
     });
 }
