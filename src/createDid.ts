@@ -3,36 +3,7 @@ import * as ed from '@noble/ed25519';
 import * as bs58 from 'bs58';
 import fetch from 'node-fetch';
 
-export interface ServiceEndpoint {
-    id: string
-    type: string
-    serviceEndpoint: string
-    description?: string
-};
-
-export interface VerificationMethod {
-    id: string
-    type: string
-    controller: string
-    publicKeyBase58: string
-};
-
-export interface DIDDocument {
-    '@context': 'https://www.w3.org/ns/did/v1' | string | string[]
-    id: string
-    controller?: string | string[]
-    verificationMethod?: VerificationMethod[]
-    authentication?:string[]
-    assertionMethod?:string[]
-    keyAgreement?:string[]
-    service?: ServiceEndpoint[]
-};
-
-//request body to be sent in the fetch request
-export interface RequestBody{ 
-    didDocument:DIDDocument //did Document
-    signature:string        //base 58 signature (signature is produce from a Uint8Array of the document, not a string)
-}
+import { ServiceEndpoint, VerificationMethod, DIDDocument, RequestBody } from './types';
 
 
 /**
@@ -40,46 +11,46 @@ export interface RequestBody{
  * @returns a string containind the did
  */
 export async function createDID(privateKey:Uint8Array): Promise<string> {
-    try {
-        return new Promise<string>(async (resolve,reject)=>{
+    return new Promise<string>(async (resolve,reject)=>{
+        //create the did
+        let did="did:monokee:"+uuid.v4();
 
-            //create the did
-            let did="did:monokee:"+uuid.v4();
+        //create the keys
+        if(privateKey.length !== 32)
+            reject("invalid private key")
 
-            //create the keys
-            if(privateKey.length !== 32){
-                reject("invalid private key")
-            }
-            else{
-                let publicKey = <Uint8Array>await ed.getPublicKey(privateKey);
+        else{
+            let publicKey = await ed.getPublicKey(privateKey).catch((err)=>{reject(err)});
 
+            if(publicKey instanceof Uint8Array){ //check on publicKey integrity
                 let publicKeyb58= bs58.encode(publicKey);
-                let x25519key=await ed.getSharedSecret(privateKey,publicKey);
-                let x25519keyb58=bs58.encode(x25519key);
-    
-                //create the document
-                let didDocument=await createDidDocument(did,publicKeyb58,x25519keyb58);
-    
-                //obtain 
-                let requestbody=await createRequestBody(didDocument,privateKey);
-                
-                let url:string = "http://localhost:8080/createdid";
-    
-                let responseMetadata:any = await fetch(url, {
-                    method: 'post',
-                    body: JSON.stringify(requestbody),
-                    headers: {'Content-Type': 'application/json'}
-                }).then((res)=> {return res.json()})
-                resolve(did);
-            }
-           
-
-        });
+                let x25519key=await ed.getSharedSecret(privateKey,publicKey).catch((err)=>{reject(err)});
+                if(x25519key instanceof Uint8Array){ //check on x25519 key integrity
+                    let x25519keyb58=bs58.encode(x25519key);
+                    //create the document
+                    let didDocument=createDidDocument(did,publicKeyb58,x25519keyb58);
         
-    } catch (error) {
-        console.log(`Error occurred in createDID function ${error}`); //logger could be better
-        throw error;
-    }
+                    //obtain 
+                    let requestbody=await createRequestBody(didDocument,privateKey).catch((err)=>{reject(err)});
+                    if(isRequestBody(requestbody) ){
+                        let url:string = "http://localhost:8080/createdid";
+                        let responseMetadata:any = await fetch(url, {
+                            method: 'post',
+                            body: JSON.stringify(requestbody),
+                            headers: {'Content-Type': 'application/json'}
+                        }).then(async (res)=> {
+                            let sup= await res.json();
+                            if(res.status!=200)
+                                reject(sup.error);
+                            else
+                                resolve(did);
+                        }).catch((err)=>{reject("Error occurred while calling API")});
+
+                    } // close check on requestBody
+                }//close check on x25519 shared secret
+            }//close check on publicKey validity 
+        }
+    });
 }
 
 /**
@@ -89,21 +60,21 @@ export async function createDID(privateKey:Uint8Array): Promise<string> {
  * @returns the body that has to be attached to the api POST request 
  */
 async function createRequestBody(didDocument:DIDDocument,privateKey:Uint8Array):Promise<RequestBody>{
-    return new Promise<RequestBody>(async(resolve)=>{
+    return new Promise<RequestBody>(async(resolve,reject)=>{
         let json =  JSON.stringify(didDocument);
         let message:Uint8Array = Buffer.from(json); 
         //the message is encrypted starting from a Uint8array because of problem
         //while signign the whole document as a string (Number.parseInt() exception)
-        let signature= await ed.sign(message,privateKey);
-        let encodedSignature= bs58.encode(signature);
-
-        let ret : RequestBody ={
-            didDocument:didDocument,
-            signature:encodedSignature
-        };
-
-        //var string = new TextDecoder().decode(arr); //test the encode
-        resolve(ret);
+        let signature= await ed.sign(message,privateKey).catch((err)=>reject(err));
+        
+        if(signature instanceof Uint8Array){ //if the signature has been successfully created
+            let encodedSignature= bs58.encode(signature/*Buffer.from("notAValidKey")*/);
+            let ret : RequestBody ={
+                didDocument:didDocument,
+                signature:encodedSignature
+            };
+            resolve(ret);
+        }
     })
 }
 
@@ -141,4 +112,8 @@ async function createRequestBody(didDocument:DIDDocument,privateKey:Uint8Array):
         keyAgreement:[vm2.id]
     };
     return document;
+}
+
+function isRequestBody(s:any):DIDDocument{
+    return s.didDocument;
 }

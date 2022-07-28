@@ -66,7 +66,7 @@ export interface DereferencingMetadata {
 }
 
 
-export interface ContentMetadata{ //must be a didDocumentMetadata if DereferencingResponse contains a DIDDocument
+export interface ContentMetadata{ //temporarly empty
 
 }
 
@@ -76,6 +76,6 @@ export interface DereferencingOptions{
 
 export interface DereferencingResponse{
     dereferencingMetadata:DereferencingMetadata | string,
-    contentStream:ServiceEndpoint | VerificationMethod | DIDDocument |string,
+    contentStream:ServiceEndpoint | VerificationMethod | DIDDocument | {},
     contentMetadata:ContentMetadata | string
 }

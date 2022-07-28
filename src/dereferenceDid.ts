@@ -27,96 +27,99 @@ const DID_MATCHER = new RegExp(`^did:${METHOD}:${METHOD_ID}${PARAMS}${PATH}${QUE
  * @returns a verification method, or a service or a document depending on the didUrl
  */
 export async function dereferenceDID(didUrl:string,dereferencingOptions:any): Promise<DereferencingResponse> { //
-    try {
-        return new Promise<DereferencingResponse>(async (resolve,reject)=>{
-            let parts = parse(didUrl);
-            let response :DereferencingResponse;
-            let dereferencingMetadata :DereferencingMetadata;
-            let responseContent: VerificationMethod | DIDDocument | ServiceEndpoint | string ="";
-            let contentMetadata: ContentMetadata={};
+  return new Promise<DereferencingResponse>(async (resolve,reject)=>{
+      let parts = parse(didUrl);
+      let response :DereferencingResponse;
+      let dereferencingMetadata :DereferencingMetadata;
+      let responseContent: VerificationMethod | DIDDocument | ServiceEndpoint | {}={};
+      let contentMetadata: ContentMetadata={};
 
+      if(parts==null){ //invalid DID
+        dereferencingMetadata={
+          contentType:"application/json",
+          error:"invalidDidUrl"
+        };
+        response={
+          dereferencingMetadata:dereferencingMetadata,
+          contentStream:{},
+          contentMetadata:contentMetadata
+        };
+        resolve(response)
+      }
+        
+      else{
+        let resolution=await resolveDID((<ParsedDid>parts).did);
+        if(resolution.didDocument.id){
+          let didDocument=resolution.didDocument
+          let methods=didDocument.verificationMethod;
+          let services=didDocument.service;
+          let found=false;
 
-            if(parts==null){ //invalid DID
-              dereferencingMetadata={
-                contentType:"application/json",
-                error:"invalidDidUrl"
-              };
-              response={
-                dereferencingMetadata:dereferencingMetadata,
-                contentStream:"",
-                contentMetadata:contentMetadata
-              };
-              resolve(response)
-            }
-              
-            else{
-              let didDocument=await resolveDID((<ParsedDid>parts).did);
-              let methods=didDocument.verificationMethod;
-              let services=didDocument.service;
+          //look for the key among the verification methods/services
 
-              //look for the key among the verification methods/services
-
-              //still missing the did resolution
-
-              if(methods){
-                for (let i=0;i<methods.length;i++){
-                  let sup=parts?.did+"#"+parts?.fragment;
-                  if(methods[i].id==sup){
-                    responseContent=methods[i];
-                    dereferencingMetadata = {
-                      contentType:"application/json"
-                    };
-                    response={
-                      dereferencingMetadata:dereferencingMetadata,
-                      contentStream:responseContent,
-                      contentMetadata:contentMetadata
-                    };
-                    resolve(response);
-                  }
-                   
-                }
-              }
-              if(services){
-                for (let i=0;i<services.length;i++){
-                  let sup=parts?.did+"#"+parts?.fragment;
-                  if(services[i].id==sup){
-                    //if it is a did, resolve it and return the document
-                    responseContent=services[i];
-                    dereferencingMetadata = {
-                      contentType:"application/json"
-                    };
-                    response={
-                      dereferencingMetadata:dereferencingMetadata,
-                      contentStream:responseContent,
-                      contentMetadata:contentMetadata
-                    };
-                    resolve(response);
-                  } 
-                }
-              }
-              if(responseContent=""){
-                dereferencingMetadata={
-                  contentType:"application/json",
-                  error:"notFound"
+          //still missing the did resolution
+          if(methods){ //search among methods
+            let i=0;
+            while(i<methods.length && !found){
+              let sup=parts?.did+"#"+parts?.fragment;
+              if(methods[i].id==sup){
+                responseContent=methods[i];
+                dereferencingMetadata = {
+                  contentType:"application/json"
                 };
-                responseContent="";
                 response={
                   dereferencingMetadata:dereferencingMetadata,
                   contentStream:responseContent,
                   contentMetadata:contentMetadata
                 };
+                found=true;
                 resolve(response);
-              }
-              
+              } 
+              i++;
             }
-            
-
-        });
+          }
+          if(services){ //search among services
+            let i=0;
+            while(i<services.length && !found){
+              let sup=parts?.did+"#"+parts?.fragment;
+              if(services[i].id==sup){
+                //if it is a did, resolve it and return the document
+                responseContent=services[i];
+                dereferencingMetadata = {
+                  contentType:"application/json"
+                };
+                response={
+                  dereferencingMetadata:dereferencingMetadata,
+                  contentStream:responseContent,
+                  contentMetadata:contentMetadata
+                };
+                found=true;
+                resolve(response);
+              } 
+              i++;
+            }
+          }
+          if(!found){
+            dereferencingMetadata={
+              contentType:"application/json",
+              error:"notFound"
+            };
+            response={
+              dereferencingMetadata:dereferencingMetadata,
+              contentStream:responseContent,
+              contentMetadata:contentMetadata
+            };
+            resolve(response);
+          }
+        }
+        else{
+          reject("invalid did insinde the url");
+        }
         
-    } catch (error:any) {
-        console.log(`Error occurred in dereferenceDID function ${error}`); //logger could be better
-        throw error;
-    }
+      }
+      
+
+  });
 }
 
 
@@ -151,3 +154,4 @@ export function parse(didUrl: string): ParsedDid | null {
   }
   return null
 }
+
