@@ -10,10 +10,12 @@ import { ServiceEndpoint, VerificationMethod, DIDDocument, RequestBody } from '.
  * Creates the DID and the DID Document.
  * @returns a string containind the did
  */
-export async function createDID(privateKey:Uint8Array): Promise<string> {
+export async function createDID(privateKeyString:string): Promise<string> {
     return new Promise<string>(async (resolve,reject)=>{
         //create the did
         let did="did:monokee:"+uuid.v4();
+
+        let privateKey=bs58.decode(privateKeyString);
 
         //create the keys
         if(privateKey.length !== 32)
