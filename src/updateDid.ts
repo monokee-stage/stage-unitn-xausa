@@ -38,7 +38,7 @@ export async function updateKey(privatekey:string,newKey:string,methodUrl:string
                 method: 'put',
                 body: JSON.stringify(requestBody),
                 headers: {'Content-Type': 'application/json'}
-            }).then((res:any)=>{return res.json()}).catch(()=>reject("Problem wile invoking API"));
+            }).then((res:any)=>{return res.json()}).catch(()=>reject("Problem while invoking API"));
             
             if(response===undefined){
                 reject("error on put request");
