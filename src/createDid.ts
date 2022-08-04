@@ -17,7 +17,6 @@ export async function createDID(privateKeyString:string): Promise<string> {
 
         let privateKey=bs58.decode(privateKeyString);
 
-        //create the keys
         if(privateKey.length !== 32)
             reject("invalid private key")
 

@@ -12,3 +12,4 @@ test.*
 
 #ignore all .js files
 *.js
+!test.js

@@ -59,7 +59,7 @@ export async function updateKey(privatekey:string,newKey:string,methodUrl:string
  * @param methodUrl informations about the DID to be modified. The key is automatically assigned.
  * @returns a boolean that guarantees the success of the operation
  */
-export async function addVerificationMethod(encodedPrivateKey:string,signingPrivateKey:string,did:string):Promise<boolean>{
+export async function addEd25519VerificationMethod(encodedPrivateKey:string,signingPrivateKey:string,did:string):Promise<boolean>{
     return new Promise<boolean>(async(resolve,reject)=>{
         let document=(await resolveDID(did)).didDocument;
         let keyNumber=<number>document.verificationMethod?.length+1;
