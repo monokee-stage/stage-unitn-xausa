@@ -4,6 +4,7 @@
  */
 import { resolveDID } from "./resolveDID";
 import { DIDDocument, ParsedDid, ServiceEndpoint, VerificationMethod , DereferencingResponse,DereferencingOptions,DereferencingMetadata, ContentMetadata } from "./types";
+import fetch from 'node-fetch';
 
 //from did-resolver
 const PCT_ENCODED = '(?:%[0-9a-fA-F]{2})'
@@ -82,19 +83,34 @@ export async function dereferenceDID(didUrl:string,dereferencingOptions:any): Pr
             let i=0;
             while(i<services.length && !found){
               let sup=parts?.did+"#"+parts?.fragment;
-              if(services[i].id==sup){
-                //if it is a did, resolve it and return the document
-                responseContent=services[i];
-                dereferencingMetadata = {
-                  contentType:"application/json"
-                };
-                response={
-                  dereferencingMetadata:dereferencingMetadata,
-                  contentStream:responseContent,
-                  contentMetadata:contentMetadata
-                };
+              if(services[i].id==sup){ //check if the service correspond to a did:sov
+
+                //if the service is a did:sov
+                if(services[i].type=="SovrinIssuer"){
+                  let url = "http://localhost:8888/1.0/identifiers/"+services[i].serviceEndpoint;
+                  var sovResolved=await fetch(url).then((res:any)=>{return res.json()});
+                  if(sovResolved===undefined){
+                      reject("error on get request");
+                  }
+                  else{
+                      resolve(<DereferencingResponse>sovResolved);
+                  }
+                }
+
+                
+                else{ //if not, simply return the service
+                  responseContent=services[i];
+                  dereferencingMetadata = {
+                    contentType:"application/json"
+                  };
+                  response={
+                    dereferencingMetadata:dereferencingMetadata,
+                    contentStream:responseContent,
+                    contentMetadata:contentMetadata
+                  };
+                  resolve(response);
+                }
                 found=true;
-                resolve(response);
               } 
               i++;
             }

@@ -4,12 +4,15 @@ node_modules
 #ignore .env file
 .env
 
-#ignore apis
-/api
-
 #ingore test files
 test.*
 
 #ignore all .js files
 *.js
 !test.js
+!api/api.js
+!api/models/diddocument.js
+!api/models/documentmetadata.js
+
+#ignore universal resolver
+/uni-resolver-driver-did-sov

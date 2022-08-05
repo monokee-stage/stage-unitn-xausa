@@ -57,6 +57,17 @@ test.serial('test dereferenceDID with a valid didUrl',async (t)=>{
 	.catch((err)=>t.fail(err));
 })
 
+test.serial('test dereferenceDID with a valid didUrl to obtain a did:sov document',async (t)=>{
+	await method.dereferenceDID(did+"#sov-did-1")
+	.then((res)=>{
+		if(res.didResolutionMetadata.error)
+			t.fail()
+		else
+			t.pass()
+	})
+	.catch((err)=>t.fail(err));
+})
+
 test.serial('test dereferenceDID with an unvalid url key',async (t)=>{
 	let sup=await method.dereferenceDID(did+"#invalidKey").catch((err)=>t.fail(err));
 	t.deepEqual(sup,{
@@ -76,6 +87,8 @@ test.serial('test updateKey with valid data',async (t)=>{
 	.then(()=>t.pass())
 	.catch((err)=>t.fail(err))
 })
+
+
 
 test.serial('test updateKey with unvalid new publicKey',async (t)=>{
 	await method.updateKey(bs58.encode(privateKey),bs58.encode(Buffer.from("invalidNewPublicKey")),did+"#key-1")
@@ -105,6 +118,24 @@ test.serial.skip('test addEd25519VerificationMethod with unvalid public Key for 
 	.catch(()=>t.pass()) 
 })
 
+test.serial('deactivate DID with a valid did',async (t)=>{
+	await method.deactivateDID(did,bs58.encode(privateKey1))
+	.then(()=>t.pass())
+	.catch((err)=>t.fail(err));
+})
+
+
+test.serial('deactivate DID with a unvalid did',async (t)=>{
+	await method.deactivateDID("notAValidDid",bs58.encode(privateKey1))
+	.then(()=>t.fail())
+	.catch(()=>t.pass());
+})
+
+test.serial('deactivate DID with a unvalid private key',async (t)=>{
+	await method.deactivateDID("notAValidDid",bs58.encode(Buffer.from("unvalidKey")))
+	.then(()=>t.fail())
+	.catch(()=>t.pass());
+})
 
 
 

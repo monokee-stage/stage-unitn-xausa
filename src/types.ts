@@ -75,7 +75,7 @@ export interface DereferencingOptions{
 }
 
 export interface DereferencingResponse{
-    dereferencingMetadata:DereferencingMetadata | string,
+    dereferencingMetadata:DereferencingMetadata,
     contentStream:ServiceEndpoint | VerificationMethod | DIDDocument | {},
-    contentMetadata:ContentMetadata | string
+    contentMetadata:ContentMetadata  |DidDocumentMetadata
 }

@@ -104,13 +104,20 @@ async function createRequestBody(didDocument:DIDDocument,privateKey:Uint8Array):
         publicKeyBase58: pubkx
     };
 
+    let service:ServiceEndpoint={
+        id: did+"#sov-did-1",
+        type: "SovrinIssuer",
+        serviceEndpoint: "did:sov:WRfXPg8dantKVubE3HX8pw"
+    }
+
     let document:DIDDocument={
         '@context': 'https://www.w3.org/ns/did/v1',
         id: did,
         verificationMethod: [vm1,vm2],
         authentication:[vm1.id],
         assertionMethod:[vm1.id],
-        keyAgreement:[vm2.id]
+        keyAgreement:[vm2.id],
+        service:[service]
     };
     return document;
 }
