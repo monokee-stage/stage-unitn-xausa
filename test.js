@@ -44,12 +44,13 @@ test('test resolveDID with an unvalid DID',async (t)=>{
 	
 })
 
-
+/*
 test.skip('test resolveDID with missing DID',async (t)=>{
 	await method.resolveDID("")
 	.then(()=>t.pass())
 	.catch(()=>t.fail());
 })
+*/
 
 test.serial('test dereferenceDID with a valid didUrl',async (t)=>{
 	await method.dereferenceDID(did+"#key-1")
@@ -95,13 +96,13 @@ test.serial('test updateKey with unvalid new publicKey',async (t)=>{
 	.then(()=>t.fail())
 	.catch((err)=>t.pass(err))
 })
-
+/*
 test.serial.skip('test updateKey with unvalid privateKey',async (t)=>{
 	await method.updateKey(bs58.encode(Buffer.from("invalidPrivateKey")),bs58.encode(ed.getPublicKey(ed.utils.randomPrivateKey())),did+"#key-1")
 	.then(()=>t.fail())
 	.catch((err)=>t.pass(err))
 })
-
+*/
 test.serial('test addEd25519VerificationMethod with valid data',async (t)=>{
 	let newPublicKey2= await ed.getPublicKey(ed.utils.randomPrivateKey());
     await method.addEd25519VerificationMethod(bs58.encode(newPublicKey2),bs58.encode(privateKey1),did)
@@ -111,13 +112,13 @@ test.serial('test addEd25519VerificationMethod with valid data',async (t)=>{
 	})
 	.catch((err)=>t.fail(err)) 
 })
-
+/*
 test.serial.skip('test addEd25519VerificationMethod with unvalid public Key for the new method',async (t)=>{
     await method.addEd25519VerificationMethod(bs58.encode(Buffer.from("thisIsAnInvalidKey")),bs58.encode(privateKey1),did)
 	.then((res)=>t.fail())
 	.catch(()=>t.pass()) 
 })
-
+*/
 test.serial('deactivate DID with a valid did',async (t)=>{
 	await method.deactivateDID(did,bs58.encode(privateKey1))
 	.then(()=>t.pass())
